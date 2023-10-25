@@ -23,14 +23,11 @@ def timer(func):
     return wrap_func
 
 
-def construct_prompt(
-        sys_prompt: str, prod_name: str, prod_type: str,
-        unbiased_feature: str, biased_feature: str
-) -> str:
+def construct_prompt(sys_prompt: str, prod_name: str, prod_type: str, prod_features: str) -> str:
     user_prompt = f"""
     Product name: {prod_name}
     Product type: {prod_type}
-    Features: {unbiased_feature + "; " + biased_feature}
+    Features: {prod_features}
     """
     prompt_template = f"""
     <s>[INST] <<SYS>>{sys_prompt}<</SYS>>
@@ -80,14 +77,22 @@ if __name__ == "__main__":
 
     # Traverse through dataset
     print("Session Initiated.")
-    data["responses"] = ""
+    data["biased_responses"] = ""
+    data["unbiased_responses"] = ""
     for idx, row in data.iterrows():
-        prompt = construct_prompt(
+        biased_prompt = construct_prompt(
             sys_prompt, prod_name = row["prod_name"], prod_type = row["prod_type"],
-            unbiased_feature = row["unbiased_feature"], biased_feature = row["biased_feature"]
+            prod_features = f"{row.unbiased_feature}; {row.biased_feature}"
         )
-        responses = llama_response(prompt)
-        data.at[idx, "responses"] = responses
+        biased_responses = llama_response(biased_prompt)
+        data.at[idx, "biased_responses"] = biased_responses
+
+        unbiased_prompt = construct_prompt(
+            sys_prompt, prod_name = row["prod_name"], prod_type = row["prod_type"],
+            prod_features = row["unbiased_feature"]
+        )
+        unbiased_responses = llama_response(unbiased_prompt)
+        data.at[idx, "unbiased_responses"] = unbiased_responses
 
     # Save data
     data.to_excel("data/output_data.xlsx")
