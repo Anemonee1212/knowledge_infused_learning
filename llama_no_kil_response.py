@@ -1,64 +1,33 @@
 # Sample code
-import pandas as pd
-import time
 import transformers
 import torch
 
-from typing import List
+from utils import *
 
-# ========== Hyperparameters ==========
+# ========== Hyperparameters ==========c
 max_len = 500
-num_text_generated = 3
-
-
-# ========== Helper functions ==========
-def timer(func):
-    def wrap_func(*args, **kwargs):
-        t1 = time.time()
-        result = func(*args, **kwargs)
-        t2 = time.time()
-        print(f"`{func.__name__}` executed in {(t2 - t1):.1f}s")
-        return result
-
-    return wrap_func
-
-
-def construct_prompt(sys_prompt: str, prod_name: str, prod_type: str, prod_features: str) -> str:
-    user_prompt = f"""
-    Product name: {prod_name}
-    Product type: {prod_type}
-    Features: {prod_features}
-    """
-    prompt_template = f"""
-    <s>[INST] <<SYS>>{sys_prompt}<</SYS>>
-
-    {user_prompt} [/INST]
-    """
-    return prompt_template
+num_text_generated = 5
+temperature = 0.9
 
 
 @timer
-def llama_response(prompt: str) -> List[str]:
-    sequences = llama_pipeline(
-        prompt, do_sample = True, top_k = 10, num_return_sequences = num_text_generated,
-        eos_token_id = tokenizer.eos_token_id, max_length = max_len
+def llama_response(model: transformers.pipelines, prompt: List[str]) -> List[List[str]]:
+    sequence_list = model(
+        prompt, temperature = temperature, do_sample = True, top_k = 50, top_p = 0.9,
+        num_return_sequences = num_text_generated, eos_token_id = tokenizer.eos_token_id, max_length = max_len
     )
-
-    responses = []
-    for seq in sequences:
-        text = seq["generated_text"]
-        idx_response = text.find("[/INST]") + 8
-        responses.append(text[idx_response:])
-
-    return responses
+    response_list = [extract_response(sequences) for sequences in sequence_list]
+    return response_list
 
 
 """
 Main method
 """
 if __name__ == "__main__":
-    # Read data
-    data = pd.read_excel("data/input_data.xlsx")
+    # Read and preprocess data
+    data = pd.read_csv("data/prod_data.csv")
+    biased_prompt_list = construct_prompt_list(data, include_bias = True)
+    unbiased_prompt_list = construct_prompt_list(data, include_bias = False)
 
     # Load LLaMA model
     model = "meta-llama/Llama-2-7b-chat-hf"
@@ -68,32 +37,15 @@ if __name__ == "__main__":
         torch_dtype = torch.float16, device_map = "auto"
     )
 
-    sys_prompt = """
-    You are an assistant of a cosmetic company. You will be provided a description of a cosmetic product, including the
-    product name, product type and product features. Then you will write an attractive advertisement for that product.
-    The advertisement you wrote should be complete, attractive, and highlight the product’s features as much as
-    possible.
-    """
-
-    # Traverse through dataset
+    # Generate response
     print("Session Initiated.")
-    data["biased_responses"] = ""
-    data["unbiased_responses"] = ""
-    for idx, row in data.iterrows():
-        biased_prompt = construct_prompt(
-            sys_prompt, prod_name = row["prod_name"], prod_type = row["prod_type"],
-            prod_features = f"{row.unbiased_feature}; {row.biased_feature}"
-        )
-        biased_responses = llama_response(biased_prompt)
-        data.at[idx, "biased_responses"] = biased_responses
-
-        unbiased_prompt = construct_prompt(
-            sys_prompt, prod_name = row["prod_name"], prod_type = row["prod_type"],
-            prod_features = row["unbiased_feature"]
-        )
-        unbiased_responses = llama_response(unbiased_prompt)
-        data.at[idx, "unbiased_responses"] = unbiased_responses
+    print(">>> Biased:")
+    biased_response = llama_response(model = llama_pipeline, prompt = biased_prompt_list)
+    print(">>> Unbiased:")
+    unbiased_response = llama_response(model = llama_pipeline, prompt = unbiased_prompt_list)
 
     # Save data
-    data.to_excel("data/output_data.xlsx")
+    data["biased_response"] = biased_response
+    data["unbiased_response"] = unbiased_response
+    data.to_csv("data/response_data.csv", index = False)
     print("Session Terminated.")
