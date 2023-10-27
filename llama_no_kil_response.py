@@ -4,14 +4,15 @@ import torch
 
 from utils import *
 
-# ========== Hyperparameters ==========c
+# ========== Hyperparameters ==========
 max_len = 500
 num_text_generated = 5
 temperature = 0.9
 
 
+# ========== Helper Function ==========
 @timer
-def llama_response(model: transformers.pipelines, prompt: List[str]) -> List[List[str]]:
+def llama_response(model: transformers.pipelines, tokenizer: Any, prompt: List[str]) -> List[List[str]]:
     sequence_list = model(
         prompt, temperature = temperature, do_sample = True, top_k = 50, top_p = 0.9,
         num_return_sequences = num_text_generated, eos_token_id = tokenizer.eos_token_id, max_length = max_len
@@ -40,9 +41,9 @@ if __name__ == "__main__":
     # Generate response
     print("Session Initiated.")
     print(">>> Biased:")
-    biased_response = llama_response(model = llama_pipeline, prompt = biased_prompt_list)
+    biased_response = llama_response(model = llama_pipeline, tokenizer = tokenizer, prompt = biased_prompt_list)
     print(">>> Unbiased:")
-    unbiased_response = llama_response(model = llama_pipeline, prompt = unbiased_prompt_list)
+    unbiased_response = llama_response(model = llama_pipeline, tokenizer = tokenizer, prompt = unbiased_prompt_list)
 
     # Save data
     data["biased_response"] = biased_response
