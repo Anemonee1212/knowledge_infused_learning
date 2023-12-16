@@ -29,6 +29,16 @@ a framework to fine-tune LLaMA model toward this task.
 #### Distilled KG Infusion method:
 ![detail2](https://github.com/Anemonee1212/knowledge_infused_learning/assets/64716883/d13549a7-528d-463e-b114-4c779294ce77)
 
+## Installation
+1. Install [required packages](requirements.txt).
+   Please DO NOT simply use `pip install -r requirements.txt`. Instead, install
+   ![PyTorch](https://pytorch.org/get-started/locally/) according to your configurations.
+3. Visit [Llama 2](https://ai.meta.com/llama/) site to register for the access to LLaMA model.
+4. Register for HuggingFace using the __same__ email account as you register LLaMA and apply for an access token
+   [here](https://huggingface.co/settings/tokens).
+5. Write the access token to your global environment and follow the instructions on
+   [HuggingFace](https://huggingface.co/docs/transformers/main/model_doc/llama)
+
 ## Directories
 ```bash
 - knowledge_infused_learning
