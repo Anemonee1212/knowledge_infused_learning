@@ -32,7 +32,7 @@ a framework to fine-tune LLaMA model toward this task.
 ## Installation
 1. Install [required packages](requirements.txt).
    Please DO NOT simply use `pip install -r requirements.txt`. Instead, install
-   ![PyTorch](https://pytorch.org/get-started/locally/) according to your configurations.
+   [PyTorch](https://pytorch.org/get-started/locally/) according to your configurations.
 3. Visit [Llama 2](https://ai.meta.com/llama/) site to register for the access to LLaMA model.
 4. Register for HuggingFace using the __same__ email account as you register LLaMA and apply for an access token
    [here](https://huggingface.co/settings/tokens).
