@@ -1,8 +1,8 @@
 """
-Baseline approach to use LLaMA 2 model to generate raw descriptions without Knowledge-Infused Learning.
+Distilled KG approach to use LLaMA 2 model to generate instructed responses with Knowledge Infused Learning.
 
 @author Robert Shi
-@date 12/04/2023
+@date 12/16/2023
 """
 import transformers
 import torch
@@ -31,10 +31,9 @@ def llama_response(model: transformers.pipelines, tokenizer: Any, prompt: List[s
 Main method
 """
 if __name__ == "__main__":
-    # Read and preprocess data
-    data = pd.read_csv("data/prod_data.csv")
-    biased_prompt_list = construct_prompt_list(data, include_bias = True)
-    unbiased_prompt_list = construct_prompt_list(data, include_bias = False)
+    # Read data
+    data = pd.read_csv("data/prod_data_kil_instruction.csv")
+    prompt_list = construct_prompt_list(data, include_instruct = True)
 
     # Load LLaMA model
     tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
@@ -45,13 +44,9 @@ if __name__ == "__main__":
 
     # Generate response
     print("Session Initiated.")
-    print(">>> Biased:")
-    biased_response = llama_response(model = llama_pipeline, tokenizer = tokenizer, prompt = biased_prompt_list)
-    print(">>> Unbiased:")
-    unbiased_response = llama_response(model = llama_pipeline, tokenizer = tokenizer, prompt = unbiased_prompt_list)
+    response_list = llama_response(model = llama_pipeline, tokenizer = tokenizer, prompt = prompt_list)
 
     # Save data
-    data["biased_response"] = biased_response
-    data["unbiased_response"] = unbiased_response
-    data.to_csv("data/response_data_no_kil.csv", index = False)
+    data["response"] = response_list
+    data.to_csv("data/response_data_kil.csv", index = False)
     print("Session Terminated.")
