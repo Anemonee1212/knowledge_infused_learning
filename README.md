@@ -30,7 +30,7 @@ a framework to fine-tune LLaMA model toward this task.
 ![detail2](https://github.com/Anemonee1212/knowledge_infused_learning/assets/64716883/d13549a7-528d-463e-b114-4c779294ce77)
 
 ## Installation
-1. Install [required packages](requirements.txt).
+1. Install [required packages](requirements.txt).  
    Please DO NOT simply use `pip install -r requirements.txt`. Instead, install
    [PyTorch](https://pytorch.org/get-started/locally/) according to your configurations.
 3. Visit [Llama 2](https://ai.meta.com/llama/) site to register for the access to LLaMA model.
