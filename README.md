@@ -37,7 +37,7 @@ a framework to fine-tune LLaMA model toward this task.
 4. Register for HuggingFace using the __same__ email account as you register LLaMA and apply for an access token
    [here](https://huggingface.co/settings/tokens).
 5. Write the access token to your global environment and follow the instructions on
-   [HuggingFace](https://huggingface.co/docs/transformers/main/model_doc/llama)
+   [HuggingFace](https://huggingface.co/docs/transformers/main/model_doc/llama).
 
 ## Directories
 ```bash
